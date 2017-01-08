@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    	http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-4.2.xsd
+        http://www.springframework.org/schema/data/jpa 
+        http://www.springframework.org/schema/data/jpa/spring-jpa-1.8.xsd
+        http://www.springframework.org/schema/tx 
+        http://www.springframework.org/schema/tx/spring-tx-4.2.xsd">
+	<!--创建jdbc数据源 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${ds.driverClassName}" />
+		<property name="url" value="${ds.url}" />
+		<property name="username" value="${ds.username}" />
+		<property name="password" value="${ds.password}" />
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="${ds.initialSize}" />
+		<property name="minIdle" value="${ds.minIdle}" />
+		<property name="maxActive" value="${ds.maxActive}" />
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="${ds.maxWait}" />
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="${ds.timeBetweenEvictionRunsMillis}" />
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="${ds.minEvictableIdleTimeMillis}" />
+		<property name="validationQuery" value="${ds.validationQuery}" />
+		<property name="testWhileIdle" value="${ds.testWhileIdle}" />
+		<property name="testOnBorrow" value="${ds.testOnBorrow}" />
+		<property name="testOnReturn" value="${ds.testOnReturn}" />
+		<property name="filters" value="${ds.filters}" />
+	</bean>
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+		</property>
+		<property name="packagesToScan" value="com.yangtze.film.entities" />
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<prop key="hibernate.dialect">org.hibernate.cfg.ImprovedNamingStrategy</prop>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</prop>
+				<prop key="hibernate.implicit_naming_strategy">org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl</prop>  
+			</props>
+		</property>
+	</bean>
+	<!-- (事务管理)transaction manager, use JtaTransactionManager for global tx -->
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
+	<!-- 可通过注解控制事务 -->
+	<tx:annotation-driven />
+	<jpa:repositories base-package="com.yangtze.film.repositories" 
+        entity-manager-factory-ref="entityManagerFactory">
+    </jpa:repositories>
+    
+    <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+    	<property name="maxIdle" value="" />
+    	<property name="maxActive" value="" />
+    	<property name="maxWait" value="" />
+    	<property name="testOnborrow" value="" />
+    </bean>
+    <bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+    	<property name="hostName" value="" />
+    	<property name="port" value="" />
+    	<property name="password" value="" />
+    	<property name="poolConfig" ref="poolConfig" />
+    </bean>
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">
+    	<property name="connectionFactory" ref="connectionFactory" />
+    </bean>
+</beans>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration>
+<configuration>
+	<!-- 常量：指定日志路径 -->
+	<property name="LOG_DIR" value="${HOME}/logs" />
+	<!-- 常量：应用名称 -->
+	<property name="APP_NAME" value="film-tickets" />
+
+	<!-- 控制台输出 -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{0} line%L - %msg%n</Pattern>
+		</layout>
+		<Encoding>UTF-8</Encoding>
+	</appender>
+	<!-- AllLog -->
+	<appender name="all" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>${LOG_DIR}/${APP_NAME}/${APP_NAME}_all.log</File>
+		<layout>
+			<Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{0} line%L - %msg%n</Pattern>
+			<charset>UTF-8</charset>
+		</layout>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_DIR}/${APP_NAME}/%d{yyyyMMdd}/${APP_NAME}_all.log</fileNamePattern>
+		</rollingPolicy>
+		<Encoding>UTF-8</Encoding>
+	</appender>
+	<!-- 异常日志 -->
+	<appender name="error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>ERROR</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+		<File>${LOG_DIR}/${APP_NAME}/${APP_NAME}_error.log</File>
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{0} line%L - %msg%n</Pattern>
+		</layout>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_DIR}/${APP_NAME}/%d{yyyyMMdd}/${APP_NAME}_error.log</fileNamePattern>
+		</rollingPolicy>
+		<Encoding>UTF-8</Encoding>
+	</appender>
+
+	<!-- 应用日志 -->
+	<appender name="service" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>${LOG_DIR}/${APP_NAME}/${APP_NAME}.log</File>
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{0} line%L - %msg%n</Pattern>
+		</layout>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_DIR}/${APP_NAME}/%d{yyyyMMdd}/${APP_NAME}.log</fileNamePattern>
+		</rollingPolicy>
+	</appender>
+	
+	<!-- 定时任务 -->
+	<appender name="scheduled"	class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>${LOG_DIR}/${APP_NAME}/scheduled.log</File>
+		<layout>
+			<Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{0} line%L - %msg%n</Pattern>
+			<charset>UTF-8</charset>
+		</layout>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_DIR}/${APP_NAME}/%d{yyyyMMdd}/scheduled.log</fileNamePattern>
+		</rollingPolicy>
+		<Encoding>UTF-8</Encoding>
+	</appender>
+	
+	<!-- timeMonitor.log -->
+	<appender name="timingLogger" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>${LOG_DIR}/${APP_NAME}/timingLogger/timeMonitor.log</File>
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>%msg%n</Pattern>
+			<charset>UTF-8</charset>
+		</layout>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_DIR}/${APP_NAME}/%d{yyyyMMdd}/timingLogger/timeMonitor.log</fileNamePattern>
+		</rollingPolicy>
+		<Encoding>UTF-8</Encoding>
+	</appender>
+	
+	<!-- inOutLogger.log -->
+	<appender name="inOutLogger" class="ch.qos.logback.classic.sift.SiftingAppender">
+		<discriminator>
+			<Key>txCode</Key>
+			<AdditionalKey>txCode</AdditionalKey>
+			<DefaultValue>unknown</DefaultValue>
+		</discriminator>
+		<sift>
+			<appender name="service-${txCode}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+				<File>${LOG_DIR}/${APP_NAME}/inOutLogger/${txCode}.log</File>
+				<Append>false</Append>
+				<layout class="ch.qos.logback.classic.PatternLayout">
+					<Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{0} line%L %X{uuid} - %msg%n</Pattern>
+					<charset>UTF-8</charset>
+				</layout>
+				<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+					<fileNamePattern>${LOG_DIR}/${APP_NAME}/%d{yyyyMMdd}/inOutLogger/${txCode}.log
+					</fileNamePattern>
+				</rollingPolicy>
+				<Encoding>UTF-8</Encoding>
+			</appender>
+		</sift>
+	</appender>
+	
+	<!-- 错误日志 -->
+	<logger name="com.yangtze.film" level="error" addtivity="false">
+		<appender-ref ref="error" />
+	</logger>
+	<!-- 服务日志 -->
+	<logger name="com.yangtze.film" level="info" addtivity="false">
+		<appender-ref ref="service" />
+	</logger>
+	
+	<!-- 根日志 -->
+	<root level="info">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="all" />
+	</root>
+
+</configuration>
